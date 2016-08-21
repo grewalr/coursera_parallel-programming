@@ -44,18 +44,23 @@ package object scalashop
 
   def boxBlurKernel(src: Img, x: Int, y: Int, radius: Int): RGBA =
   {
-    // Sum up surrounding pixels then get average
-    // store average in the output pixel
-    var rgbaSum = 0
+    // Sum up surrounding pixels RGBA vals then get average
+    // store average in the output pixel RGBA
     var iter = 0
-    var iterX = clamp(x - radius, 0, src.width)
+    var iterX = clamp(x - radius, 0, src.width -1)
+    var r, g, b, a = 0
 
-    while (iterX <= clamp(x + radius, 0, src.width))
+    while (iterX <= clamp(x + radius, 0, src.width -1))
     {
-      var iterY = clamp(y - radius, 0, src.height)
-      while (iterY <= clamp(y + radius, 0, src.height))
+      var iterY = clamp(y - radius, 0, src.height -1)
+      while (iterY <= clamp(y + radius, 0, src.height -1))
       {
-        rgbaSum += src(iterX, iterY)
+        val pixel = src(iterX, iterY)
+        r += red(pixel)
+        g += green(pixel)
+        b += blue(pixel)
+        a += alpha(pixel)
+
         iterY += 1
         iter += 1
       }
@@ -63,7 +68,7 @@ package object scalashop
       iterX +=1
     }
 
-    rgbaSum / iter
+    rgba(r / iter, g / iter, b  / iter, a / iter)
   }
 
   /** Computes the blurred RGBA value of a single pixel of the input image. */
@@ -73,16 +78,22 @@ package object scalashop
     // store average in the output pixel
     var rgbaSum = 0
     var iter = 0
+    var r, g, b, a = 0
 
-    for (i <- clamp(x - radius, 0, src.width) to clamp(x + radius, 0, src.width))
+    for (i <- clamp(x - radius, 0, src.width -1) to clamp(x + radius, 0, src.width -1))
     {
-      for (j <- clamp(y - radius, 0, src.height) to clamp(y + radius, 0, src.height))
+      for (j <- clamp(y - radius, 0, src.height -1) to clamp(y + radius, 0, src.height -1))
       {
-        rgbaSum += src(i, j)
+        val rgbaVal = src(i, j)
+        r += red(rgbaVal)
+        g += green(rgbaVal)
+        b += blue(rgbaVal)
+        a += alpha(rgbaVal)
+
         iter += 1
       }
     }
 
-    rgbaSum / iter
+    rgba(r / iter, g / iter, b  / iter, a / iter)
   }
 }
