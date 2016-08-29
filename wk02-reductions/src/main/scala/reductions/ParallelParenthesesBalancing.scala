@@ -45,8 +45,7 @@ object ParallelParenthesesBalancing
   {
     def loop(acc: Int, idx: Int): Int =
     {
-      if (chars.isEmpty || idx == -1) acc
-      else if (idx >= chars.length) chars.length - 1
+      if (chars.isEmpty || idx == -1 || idx >= chars.length || acc < 0) acc
       else if (chars(idx) == '(') loop(acc + 1, idx + 1)
       else if (chars(idx) == ')') loop(acc - 1, idx + 1)
       else loop(acc, idx + 1)
@@ -61,7 +60,7 @@ object ParallelParenthesesBalancing
   {
     def traverse(idx: Int, until: Int, totOpenBrace: Int, totCloseBrace: Int) : (Int, Int) =
     {
-      if (chars.isEmpty || idx >= until) (totOpenBrace, totCloseBrace)
+      if (chars.isEmpty || idx == -1 || idx >= until || totCloseBrace < 0 || totOpenBrace < 0) (totOpenBrace, totCloseBrace)
       else if (chars(idx) == '(') traverse(idx + 1, until, totOpenBrace + 1, totCloseBrace)
       else if (chars(idx) == ')') traverse(idx + 1, until, totOpenBrace, totCloseBrace + 1)
       else traverse(idx + 1, until, totOpenBrace, totCloseBrace)
@@ -69,11 +68,11 @@ object ParallelParenthesesBalancing
 
     def reduce(from: Int, until: Int) : (Int, Int) =
     {
-      if(until - from < threshold)
+      if(until - from <= threshold)
       {
         // base case call the traverse function
         val (open, close) = traverse(from, until, 0, 0)
-        (open, close)
+        (open - close, close - open)
       }
       else
       {
@@ -84,12 +83,14 @@ object ParallelParenthesesBalancing
           reduce(midPoint, until)
         )
 
-        (l._1 - r._1, l._2 - r._2)
+        ((l._1 + r._1) - (l._2 + r._2), (l._2 + r._2) - (l._1 + r._1))
       }
     }
 
     reduce(0, chars.length) == (0,0)
   }
+
+
 
   // For those who want more:
   // Prove that your reduction operator is associative!
