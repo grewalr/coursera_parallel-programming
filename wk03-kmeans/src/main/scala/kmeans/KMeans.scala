@@ -44,7 +44,7 @@ class KMeans {
 
   def classify(points: GenSeq[Point], means: GenSeq[Point]): GenMap[Point, GenSeq[Point]] =
   {
-    if (points.isEmpty) means.map(x => x -> GenSeq()).toMap
+    if (points.isEmpty) means.map(_ -> GenSeq()).toMap
     else points.groupBy(findClosest(_, means))
   }
 
