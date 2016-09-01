@@ -1,10 +1,10 @@
 package kmeans
 
-import scala.annotation.tailrec
-import scala.collection._
-import scala.util.Random
 import org.scalameter._
-import common._
+
+import scala.annotation.tailrec
+import scala.collection.{GenSeq, _}
+import scala.util.Random
 
 class KMeans {
 
@@ -42,8 +42,10 @@ class KMeans {
     closest
   }
 
-  def classify(points: GenSeq[Point], means: GenSeq[Point]): GenMap[Point, GenSeq[Point]] = {
-    ???
+  def classify(points: GenSeq[Point], means: GenSeq[Point]): GenMap[Point, GenSeq[Point]] =
+  {
+    if (points.isEmpty) means.map(x => x -> GenSeq()).toMap
+    else points.groupBy(findClosest(_, means))
   }
 
   def findAverage(oldMean: Point, points: GenSeq[Point]): Point = if (points.length == 0) oldMean else {
@@ -76,12 +78,17 @@ class KMeans {
  *
  *  Note: deliberately uses reference equality.
  */
-class Point(val x: Double, val y: Double, val z: Double) {
+class Point(val x: Double, val y: Double, val z: Double)
+{
   private def square(v: Double): Double = v * v
-  def squareDistance(that: Point): Double = {
-    square(that.x - x)  + square(that.y - y) + square(that.z - z)
+
+  def squareDistance(that: Point): Double =
+  {
+    square(that.x - x) + square(that.y - y) + square(that.z - z)
   }
+
   private def round(v: Double): Double = (v * 100).toInt / 100.0
+
   override def toString = s"(${round(x)}, ${round(y)}, ${round(z)})"
 }
 
