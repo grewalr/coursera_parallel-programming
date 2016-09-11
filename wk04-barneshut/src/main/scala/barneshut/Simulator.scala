@@ -11,24 +11,36 @@ import common._
 
 class Simulator(val taskSupport: TaskSupport, val timeStats: TimeStatistics) {
 
-  def updateBoundaries(boundaries: Boundaries, body: Body): Boundaries = {
-    ???
+  def updateBoundaries(boundaries: Boundaries, body: Body): Boundaries =
+  {
+    boundaries.minX = math.min(boundaries.minX, body.x)
+    boundaries.minY = math.min(boundaries.minY, body.y)
+    boundaries.maxX = math.max(boundaries.maxX, body.x)
+    boundaries.maxY = math.max(boundaries.maxY, body.y)
+    boundaries
   }
 
-  def mergeBoundaries(a: Boundaries, b: Boundaries): Boundaries = {
-    ???
+  def mergeBoundaries(a: Boundaries, b: Boundaries): Boundaries =
+  {
+    a.minX = math.min(a.minX, b.minX)
+    a.minY = math.min(a.minY, b.minY)
+    a.maxX = math.max(a.maxX, b.maxX)
+    a.maxY = math.max(a.maxY, b.maxY)
+    a
   }
 
-  def computeBoundaries(bodies: Seq[Body]): Boundaries = timeStats.timed("boundaries") {
+  def computeBoundaries(bodies: Seq[Body]): Boundaries = timeStats.timed("boundaries")
+  {
     val parBodies = bodies.par
     parBodies.tasksupport = taskSupport
     parBodies.aggregate(new Boundaries)(updateBoundaries, mergeBoundaries)
   }
 
-  def computeSectorMatrix(bodies: Seq[Body], boundaries: Boundaries): SectorMatrix = timeStats.timed("matrix") {
+  def computeSectorMatrix(bodies: Seq[Body], boundaries: Boundaries): SectorMatrix = timeStats.timed("matrix")
+  {
     val parBodies = bodies.par
     parBodies.tasksupport = taskSupport
-    ???
+    parBodies.aggregate(new SectorMatrix(boundaries, SECTOR_PRECISION))(_ += _, _ combine _)
   }
 
   def computeQuad(sectorMatrix: SectorMatrix): Quad = timeStats.timed("quad") {
@@ -38,7 +50,7 @@ class Simulator(val taskSupport: TaskSupport, val timeStats: TimeStatistics) {
   def updateBodies(bodies: Seq[Body], quad: Quad): Seq[Body] = timeStats.timed("update") {
     val parBodies = bodies.par
     parBodies.tasksupport = taskSupport
-    ???
+    parBodies.map(body => body.updated(quad)).toIndexedSeq
   }
 
   def eliminateOutliers(bodies: Seq[Body], sectorMatrix: SectorMatrix, quad: Quad): Seq[Body] = timeStats.timed("eliminate") {
